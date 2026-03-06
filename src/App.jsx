@@ -206,18 +206,34 @@ function AppShell() {
 }
 
 // ── Auth gate ──────────────────────────────────────────────────
+const VALID_AUTH_PAGES = ['login', 'register', 'forgot']
+
 function AuthGate() {
   const { currentUser } = useAuth()
-  const [authPage, setAuthPage] = useState('login')
+
+  const [authPage, setAuthPage] = useState(() => {
+    const saved = localStorage.getItem('cpmc_auth_page')
+    return VALID_AUTH_PAGES.includes(saved) ? saved : 'login'
+  })
+
+  const navigateAuth = (page) => {
+    setAuthPage(page)
+    localStorage.setItem('cpmc_auth_page', page)
+  }
+
+  // Once logged in, clear the saved auth page so next logout starts fresh at login
+  useEffect(() => {
+    if (currentUser) localStorage.removeItem('cpmc_auth_page')
+  }, [currentUser])
 
   if (currentUser) return <AppShell />
 
-  if (authPage === 'register') return <RegisterPage onBack={() => setAuthPage('login')} />
-  if (authPage === 'forgot')   return <ForgotPinPage onBack={() => setAuthPage('login')} />
+  if (authPage === 'register') return <RegisterPage onBack={() => navigateAuth('login')} />
+  if (authPage === 'forgot')   return <ForgotPinPage onBack={() => navigateAuth('login')} />
   return (
     <LoginPage
-      onRegister={() => setAuthPage('register')}
-      onForgot={() => setAuthPage('forgot')}
+      onRegister={() => navigateAuth('register')}
+      onForgot={() => navigateAuth('forgot')}
     />
   )
 }

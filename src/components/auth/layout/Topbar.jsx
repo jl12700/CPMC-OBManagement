@@ -117,7 +117,7 @@ export default function Topbar({ notifications = [], unreadCount = 0, onMarkRead
 
   return (
     <>
-      {/* Responsive helpers – hide profile text on small screens, clamp dropdown */}
+      {/* Responsive helpers */}
       <style>{`
         @media (max-width: 480px) {
           .topbar-profile-text { display: none !important; }
@@ -128,6 +128,12 @@ export default function Topbar({ notifications = [], unreadCount = 0, onMarkRead
             right: 16px !important;
             width: auto !important;
           }
+        }
+        @media (max-width: 768px) {
+          .topbar-profile-name { max-width: 80px !important; }
+        }
+        @media (min-width: 769px) and (max-width: 1100px) {
+          .topbar-profile-name { max-width: 110px !important; }
         }
       `}</style>
 
@@ -215,31 +221,62 @@ export default function Topbar({ notifications = [], unreadCount = 0, onMarkRead
           </div>
 
           {/* Profile */}
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', minWidth: 0 }}>
             <button
               onClick={() => { setShowProfile(v => !v); setShowNotifs(false) }}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 12px 5px 6px', borderRadius: 24, border: `1px solid ${colors.border}`, background: 'rgba(255,255,255,0.05)', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.2s', height: 38 }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '5px 10px 5px 6px',
+                borderRadius: 24,
+                border: `1px solid ${colors.border}`,
+                background: 'rgba(255,255,255,0.05)',
+                cursor: 'pointer', fontFamily: 'inherit',
+                transition: 'background 0.2s',
+                height: 38,
+                maxWidth: 220,
+                minWidth: 0,
+                overflow: 'hidden',
+              }}
               onMouseEnter={e => e.currentTarget.style.background = colors.hover}
               onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
             >
+              {/* Avatar */}
               <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#3182ce', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: 'white', flexShrink: 0 }}>
                 {initials}
               </div>
-              <div className="topbar-profile-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 140 }}>
+
+              {/* Name + Role — hidden on very small screens */}
+              <div className="topbar-profile-text" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', minWidth: 0, flex: 1, overflow: 'hidden' }}>
+                <span
+                  className="topbar-profile-name"
+                  title={name}
+                  style={{
+                    fontSize: 13, fontWeight: 600, color: colors.textPrimary,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    maxWidth: 140, width: '100%', display: 'block',
+                  }}
+                >
                   {name}
                 </span>
                 <span style={{ fontSize: 10, fontWeight: 700, color: roleStyle.color, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.2 }}>
                   {role}
                 </span>
               </div>
-              <div style={{ color: colors.textSecondary, marginLeft: 2 }}>
+
+              {/* Chevron — never shrinks */}
+              <div style={{ color: colors.textSecondary, flexShrink: 0 }}>
                 <ChevronIcon />
               </div>
             </button>
 
             {showProfile && (
               <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: colors.dropdownBg, border: `1px solid ${colors.border}`, borderRadius: 12, minWidth: 200, boxShadow: '0 12px 40px rgba(0,0,0,0.5)', zIndex: 200, overflow: 'hidden' }}>
+                {/* User info header inside dropdown */}
+                <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${colors.border}`, background: 'rgba(255,255,255,0.02)' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, wordBreak: 'break-word', lineHeight: 1.4 }}>{name}</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: roleStyle.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 3 }}>{role}</div>
+                </div>
+
                 <div onClick={openEditName} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', fontSize: 13, cursor: 'pointer', color: colors.textPrimary, transition: 'background 0.2s' }}
                   onMouseEnter={e => e.currentTarget.style.background = colors.hover}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>

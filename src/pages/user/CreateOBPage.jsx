@@ -23,6 +23,11 @@ const XIcon = () => (
     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
   </svg>
 )
+const ChevronDown = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6,9 12,15 18,9"/>
+  </svg>
+)
 
 // ── Reusable field components ─────────────────────────────────
 const Label = ({ children, required }) => (
@@ -32,12 +37,16 @@ const Label = ({ children, required }) => (
 )
 
 const inputStyle = (disabled) => ({
-  width: '100%', padding: '9px 12px',
+  width: '100%', padding: '10px 12px',
   border: '1px solid #E2E8F0', borderRadius: 6,
-  fontSize: 13.5, fontFamily: 'inherit', outline: 'none',
+  fontSize: 14, fontFamily: 'inherit', outline: 'none',
   background: disabled ? '#F7FAFC' : 'white',
   color: disabled ? '#718096' : '#1A202C',
   boxSizing: 'border-box',
+  WebkitAppearance: 'none',
+  MozAppearance: 'none',
+  appearance: 'none',
+  minHeight: 42, // touch-friendly tap target
 })
 
 const FieldError = ({ msg }) => msg
@@ -46,15 +55,39 @@ const FieldError = ({ msg }) => msg
 
 // ── Confirmation Modal ────────────────────────────────────────
 const ConfirmModal = ({ data, onClose, onConfirm, submitting, submitError }) => (
-  <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
-    <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: 14, boxShadow: '0 8px 32px rgba(0,0,0,0.16)', width: '100%', maxWidth: 480 }}>
-      <div style={{ padding: '18px 24px 14px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+  <div
+    onClick={onClose}
+    style={{
+      position: 'fixed', inset: 0,
+      background: 'rgba(0,0,0,0.5)',
+      display: 'flex', alignItems: 'center',
+      justifyContent: 'center', zIndex: 1000,
+      padding: 20,
+    }}
+  >
+    <div
+      onClick={e => e.stopPropagation()}
+      style={{
+        background: 'white',
+        borderRadius: 14,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.16)',
+        width: '100%',
+        maxWidth: 480,
+        maxHeight: '90vh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* Header */}
+      <div style={{ padding: '18px 24px 14px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <span style={{ fontSize: 15, fontWeight: 700 }}>Confirm Submission</span>
         <button onClick={onClose} style={{ background: 'none', border: '1px solid #E2E8F0', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', color: '#718096', display: 'flex', alignItems: 'center' }}>
           <XIcon />
         </button>
       </div>
-      <div style={{ padding: '20px 24px' }}>
+
+      {/* Scrollable content */}
+      <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
         {submitError && (
           <div style={{ color: '#E53E3E', fontSize: 13, marginBottom: 12, padding: '8px 12px', background: '#FFF5F5', borderRadius: 6 }}>{submitError}</div>
         )}
@@ -68,7 +101,9 @@ const ConfirmModal = ({ data, onClose, onConfirm, submitting, submitError }) => 
           </div>
         ))}
       </div>
-      <div style={{ padding: '14px 24px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+
+      {/* Footer */}
+      <div style={{ padding: '14px 24px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 10, justifyContent: 'flex-end', flexShrink: 0 }}>
         <button onClick={onClose} style={{ padding: '8px 16px', border: '1px solid #E2E8F0', borderRadius: 6, background: 'white', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
           Edit
         </button>
@@ -82,12 +117,57 @@ const ConfirmModal = ({ data, onClose, onConfirm, submitting, submitError }) => 
   </div>
 )
 
+// ── Collapsible Preview Panel (mobile) ───────────────────────
+const MobilePreview = ({ previewRows, filledCount, totalCount, pct }) => {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ background: 'white', borderRadius: 10, border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginBottom: 16 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+          padding: '13px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          fontFamily: 'inherit',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#1A202C' }}>Form Preview</span>
+          {/* Inline progress bar */}
+          <div style={{ flex: 1, height: 5, background: '#EDF2F7', borderRadius: 99, overflow: 'hidden', maxWidth: 120 }}>
+            <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#38A169' : '#1E56A0', borderRadius: 99, transition: 'width 0.3s ease' }} />
+          </div>
+          <span style={{ fontSize: 12, fontWeight: 700, color: pct === 100 ? '#38A169' : '#1E56A0', whiteSpace: 'nowrap' }}>{pct}%</span>
+        </div>
+        <div style={{ marginLeft: 8, transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', color: '#718096' }}>
+          <ChevronDown />
+        </div>
+      </button>
+
+      {open && (
+        <div style={{ borderTop: '1px solid #E2E8F0', padding: '4px 0 8px' }}>
+          {previewRows.map(({ label, value }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '9px 16px', borderBottom: '1px solid #F7FAFC' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#A0AEC0', textTransform: 'uppercase', letterSpacing: '0.05em', width: 80, flexShrink: 0, paddingTop: 1 }}>{label}</div>
+              <div style={{ fontSize: 13, color: value ? '#1A202C' : '#CBD5E0', fontStyle: value ? 'normal' : 'italic', wordBreak: 'break-word', flex: 1 }}>
+                {value || 'Not filled yet'}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 export default function CreateOBPage() {
   const { currentUser }   = useAuth()
   const { createRequest } = useRequests()
   const { supervisors }   = useUsers()
   const today             = todayISO()
+
+  // Detect mobile via window width (simple SSR-safe check)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const [form, setForm] = useState({
     scheduled_date:     '',
@@ -152,7 +232,6 @@ export default function CreateOBPage() {
     ? `Others - ${form.destination_custom || '(not specified)'}`
     : form.destination
 
-  // Format time for display (e.g. "14:30" → "2:30 PM")
   const formatTime = (t) => {
     if (!t) return '—'
     const [h, m] = t.split(':').map(Number)
@@ -171,113 +250,244 @@ export default function CreateOBPage() {
     ['Shift',       form.shift],
   ]
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 16px' }}>
+  const previewRows = [
+    { label: 'Employee',    value: currentUser?.full_name },
+    { label: 'Date',        value: form.scheduled_date ? formatDate(form.scheduled_date) : null },
+    { label: 'Departure',   value: form.departure_time  ? formatTime(form.departure_time) : null },
+    { label: 'Shift',       value: form.shift },
+    { label: 'Destination', value: destinationLabel !== 'Others - (not specified)' ? destinationLabel : null },
+    { label: 'Purpose',     value: form.purpose.trim() || null },
+    { label: 'Supervisor',  value: supervisor?.full_name || null },
+  ]
 
-      {/* Page header */}
-      <div style={{ width: '100%', maxWidth: 640, marginBottom: 20 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 800, color: '#1A202C' }}>Create OB Request</h1>
-        <p style={{ fontSize: 13, color: '#718096', marginTop: 2 }}>Fill out the form below to submit an official business request.</p>
+  const filledCount = previewRows.filter(r => r.value).length
+  const totalCount  = previewRows.length
+  const pct         = Math.round((filledCount / totalCount) * 100)
+
+  // ── Form card (shared between layouts) ───────────────────────
+  const FormCard = (
+    <div style={{ background: 'white', borderRadius: 10, border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid #E2E8F0' }}>
+        <span style={{ fontSize: 14, fontWeight: 700 }}>Request Details</span>
       </div>
+      <div style={{ padding: '20px 16px' }}>
 
-      {/* Success banner */}
-      {submitted && (
-        <div style={{ width: '100%', maxWidth: 640, padding: '12px 16px', borderRadius: 6, background: '#F0FFF4', color: '#38A169', border: '1px solid #9AE6B4', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <CheckIcon /> Request submitted! Your supervisor has been notified.
+        {/* Employee Name */}
+        <div style={{ marginBottom: 16 }}>
+          <Label>Employee Name</Label>
+          <input value={currentUser?.full_name || ''} disabled style={inputStyle(true)} />
         </div>
-      )}
 
-      {/* Form card */}
-      <div style={{ background: 'white', borderRadius: 10, border: '1px solid #E2E8F0', width: '100%', maxWidth: 640, boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid #E2E8F0' }}>
-          <span style={{ fontSize: 14, fontWeight: 700 }}>Request Details</span>
-        </div>
-        <div style={{ padding: 24 }}>
-
-          {/* Employee Name */}
-          <div style={{ marginBottom: 16 }}>
-            <Label>Employee Name</Label>
-            <input value={currentUser?.full_name || ''} disabled style={inputStyle(true)} />
+        {/* Date + Time (stacked on mobile, side-by-side on larger) */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>
+          <div>
+            <Label required>Scheduled Date</Label>
+            <input type="date" min={today} value={form.scheduled_date}
+              onChange={e => field('scheduled_date', e.target.value)}
+              style={inputStyle(false)} />
+            <FieldError msg={errors.scheduled_date} />
           </div>
-
-          {/* Date + Time + Shift — 3 columns */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 16 }}>
-            <div>
-              <Label required>Scheduled Date</Label>
-              <input type="date" min={today} value={form.scheduled_date}
-                onChange={e => field('scheduled_date', e.target.value)}
-                style={inputStyle(false)} />
-              <FieldError msg={errors.scheduled_date} />
-            </div>
-            <div>
-              <Label required>Departure Time</Label>
-              <input type="time" value={form.departure_time}
-                onChange={e => field('departure_time', e.target.value)}
-                style={inputStyle(false)} />
-              <FieldError msg={errors.departure_time} />
-            </div>
-            <div>
-              <Label required>Shift</Label>
-              <select value={form.shift} onChange={e => field('shift', e.target.value)} style={inputStyle(false)}>
+          <div>
+            <Label required>Departure Time</Label>
+            <input type="time" value={form.departure_time}
+              onChange={e => field('departure_time', e.target.value)}
+              style={inputStyle(false)} />
+            <FieldError msg={errors.departure_time} />
+          </div>
+          <div>
+            <Label required>Shift</Label>
+            <div style={{ position: 'relative' }}>
+              <select value={form.shift} onChange={e => field('shift', e.target.value)} style={{ ...inputStyle(false), paddingRight: 32 }}>
                 {SHIFTS.map(s => <option key={s}>{s}</option>)}
               </select>
+              <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#718096' }}>
+                <ChevronDown />
+              </div>
             </div>
           </div>
+        </div>
 
-          {/* Destination */}
-          <div style={{ marginBottom: 16 }}>
-            <Label required>Destination</Label>
-            <select value={form.destination} onChange={e => field('destination', e.target.value)} style={inputStyle(false)}>
+        {/* Destination */}
+        <div style={{ marginBottom: 16 }}>
+          <Label required>Destination</Label>
+          <div style={{ position: 'relative' }}>
+            <select value={form.destination} onChange={e => field('destination', e.target.value)} style={{ ...inputStyle(false), paddingRight: 32 }}>
               {DESTINATIONS.map(d => <option key={d}>{d}</option>)}
             </select>
-          </div>
-
-          {/* Custom destination — only shown when Others is selected */}
-          {form.destination === 'Others' && (
-            <div style={{ marginBottom: 16 }}>
-              <Label required>Specify Destination</Label>
-              <input
-                value={form.destination_custom}
-                onChange={e => field('destination_custom', e.target.value)}
-                placeholder="e.g. Outlets, Robinsons..."
-                style={inputStyle(false)}
-                autoFocus
-              />
-              <FieldError msg={errors.destination_custom} />
+            <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#718096' }}>
+              <ChevronDown />
             </div>
-          )}
-
-          {/* Purpose */}
-          <div style={{ marginBottom: 16 }}>
-            <Label required>Purpose</Label>
-            <textarea value={form.purpose} onChange={e => field('purpose', e.target.value)}
-              placeholder="Describe the purpose of this official business..."
-              rows={3} style={{ ...inputStyle(false), resize: 'vertical' }} />
-            <FieldError msg={errors.purpose} />
           </div>
+        </div>
 
-          {/* Supervisor */}
-          <div style={{ marginBottom: 24 }}>
-            <Label required>Senior Supervisor</Label>
-            <select value={form.supervisor_id} onChange={e => field('supervisor_id', e.target.value)} style={inputStyle(false)}>
+        {/* Custom destination */}
+        {form.destination === 'Others' && (
+          <div style={{ marginBottom: 16 }}>
+            <Label required>Specify Destination</Label>
+            <input
+              value={form.destination_custom}
+              onChange={e => field('destination_custom', e.target.value)}
+              placeholder="e.g. Outlets, Robinsons..."
+              style={inputStyle(false)}
+              autoFocus
+            />
+            <FieldError msg={errors.destination_custom} />
+          </div>
+        )}
+
+        {/* Purpose */}
+        <div style={{ marginBottom: 16 }}>
+          <Label required>Purpose</Label>
+          <textarea value={form.purpose} onChange={e => field('purpose', e.target.value)}
+            placeholder="Describe the purpose of this official business and note if necessary..."
+            rows={4} style={{ ...inputStyle(false), resize: 'vertical', lineHeight: 1.5 }} />
+          <FieldError msg={errors.purpose} />
+        </div>
+
+        {/* Supervisor */}
+        <div style={{ marginBottom: 24 }}>
+          <Label required>Senior Supervisor</Label>
+          <div style={{ position: 'relative' }}>
+            <select value={form.supervisor_id} onChange={e => field('supervisor_id', e.target.value)} style={{ ...inputStyle(false), paddingRight: 32 }}>
               <option value="">— Select Supervisor —</option>
               {supervisors.map(s => <option key={s.id} value={s.id}>{s.full_name}</option>)}
             </select>
-            <FieldError msg={errors.supervisor_id} />
-            {supervisors.length === 0 && (
-              <div style={{ color: '#D97706', fontSize: 12, marginTop: 4 }}>No supervisors available. Contact your admin.</div>
-            )}
+            <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#718096' }}>
+              <ChevronDown />
+            </div>
           </div>
-
-          {/* Submit */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={handleReview}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '10px 22px', border: 'none', borderRadius: 6, background: '#1E56A0', color: 'white', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-              <EyeIcon /> Review & Submit
-            </button>
-          </div>
-
+          <FieldError msg={errors.supervisor_id} />
+          {supervisors.length === 0 && (
+            <div style={{ color: '#D97706', fontSize: 12, marginTop: 4 }}>No supervisors available. Contact your admin.</div>
+          )}
         </div>
+
+        {/* Submit button — full width on mobile */}
+        <button onClick={handleReview}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+            width: '100%', padding: '12px 22px',
+            border: 'none', borderRadius: 6, background: '#1E56A0', color: 'white',
+            fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
+          }}>
+          <EyeIcon /> Review & Submit
+        </button>
+
+      </div>
+    </div>
+  )
+
+  // ── Desktop sidebar panels ─────────────────────────────────
+  const DesktopSidebar = (
+    <div style={{ flex: '0 0 calc(40% - 20px)', minWidth: 0, position: 'sticky', top: 0 }}>
+      {/* Progress card */}
+      <div style={{ background: 'white', borderRadius: 10, border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginBottom: 14 }}>
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 14, fontWeight: 700 }}>Completion</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: pct === 100 ? '#38A169' : '#1E56A0' }}>{pct}%</span>
+        </div>
+        <div style={{ padding: '16px 20px' }}>
+          <div style={{ height: 6, background: '#EDF2F7', borderRadius: 99, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#38A169' : '#1E56A0', borderRadius: 99, transition: 'width 0.3s ease' }} />
+          </div>
+          <div style={{ fontSize: 12, color: '#718096', marginTop: 8 }}>
+            {filledCount} of {totalCount} fields filled
+          </div>
+        </div>
+      </div>
+
+      {/* Preview card */}
+      <div style={{ background: 'white', borderRadius: 10, border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid #E2E8F0' }}>
+          <span style={{ fontSize: 14, fontWeight: 700 }}>Preview</span>
+        </div>
+        <div style={{ padding: '6px 0' }}>
+          {previewRows.map(({ label, value }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 20px', borderBottom: '1px solid #F7FAFC' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#A0AEC0', textTransform: 'uppercase', letterSpacing: '0.05em', width: 90, flexShrink: 0, paddingTop: 1 }}>{label}</div>
+              <div style={{ fontSize: 13, color: value ? '#1A202C' : '#CBD5E0', fontStyle: value ? 'normal' : 'italic', wordBreak: 'break-word', flex: 1 }}>
+                {value || 'Not filled yet'}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <>
+      {/* Responsive styles injected via <style> */}
+      <style>{`
+        .ob-layout {
+          display: flex;
+          gap: 20px;
+          align-items: flex-start;
+        }
+        .ob-form-col {
+          flex: 0 0 60%;
+          min-width: 0;
+        }
+        .ob-sidebar {
+          flex: 0 0 calc(40% - 20px);
+          min-width: 0;
+          position: sticky;
+          top: 0;
+        }
+        .ob-mobile-preview { display: none; }
+
+        @media (max-width: 767px) {
+          .ob-layout {
+            display: block;
+          }
+          .ob-form-col {
+            flex: none;
+            width: 100%;
+          }
+          .ob-sidebar {
+            display: none;
+          }
+          .ob-mobile-preview {
+            display: block;
+          }
+        }
+      `}</style>
+
+      <div style={{ padding: '0 4px' }}>
+
+        {/* Page header */}
+        <div style={{ marginBottom: 16 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 800, color: '#1A202C', margin: 0 }}>Create OB Request</h1>
+          <p style={{ fontSize: 13, color: '#718096', marginTop: 4, marginBottom: 0 }}>Fill out the form below to submit an official business request.</p>
+        </div>
+
+        {/* Success banner */}
+        {submitted && (
+          <div style={{ padding: '12px 16px', borderRadius: 6, background: '#F0FFF4', color: '#38A169', border: '1px solid #9AE6B4', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
+            <CheckIcon /> Request submitted! Your supervisor has been notified.
+          </div>
+        )}
+
+        {/* Mobile collapsible preview — shown above form on small screens */}
+        <div className="ob-mobile-preview">
+          <MobilePreview
+            previewRows={previewRows}
+            filledCount={filledCount}
+            totalCount={totalCount}
+            pct={pct}
+          />
+        </div>
+
+        {/* Layout */}
+        <div className="ob-layout">
+          <div className="ob-form-col">
+            {FormCard}
+          </div>
+          <div className="ob-sidebar">
+            {DesktopSidebar}
+          </div>
+        </div>
+
       </div>
 
       {/* Confirmation modal */}
@@ -290,6 +500,6 @@ export default function CreateOBPage() {
           submitError={submitError}
         />
       )}
-    </div>
+    </>
   )
 }

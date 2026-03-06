@@ -5,34 +5,25 @@ import { isValidCpmcId, isValidPin } from '../../utils/helpers'
 import PinInput from './layout/shared/modals/PinInput'
 
 /* ─── fixed dimensions ───────────────────────────────────────── */
-const CARD_WIDTH = 860
-const CARD_HEIGHT = 520
+const CARD_WIDTH = 'min(1400px, 95vw)'
+const CARD_HEIGHT = 'min(760px, 92vh)'
 
 /* ─── styles ─────────────────────────────────────────────────── */
 const styles = {
-  page: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: '#f0f4f8',
-    padding: 16,
-    fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
-  },
-  card: {
-    display: 'flex',
-    borderRadius: 20,
-    overflow: 'hidden',
-    boxShadow: '0 25px 60px rgba(0,0,0,0.12)',
-    width: '100%',
-    maxWidth: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    background: '#FFFFFF',
-  },
+page: {
+  height: '100vh',
+  width: '100vw',
+  display: 'flex',
+},
+card: {
+  display: 'flex',
+  width: '100%',
+  height: '100%',
+},
   /* Left branding pane – 45% */
   left: {
-    flex: '0 0 45%',
-    background: 'linear-gradient(135deg, #3182ce 0%, #2b6cb0 40%, #2c5282 100%)',
+    flex: '1',
+    background: '#0F1C2E',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -62,6 +53,7 @@ const styles = {
     justifyContent: 'center',
     padding: 'clamp(24px, 4vw, 44px)',
     overflowY: 'auto',
+    background: "linear-gradient(135deg,#eef2f7,#f8fafc)"
   },
   heading: {
     fontSize: 'clamp(22px, 2.4vw, 28px)',
@@ -86,8 +78,8 @@ const styles = {
   input: {
     width: '100%',
     padding: '10px 16px',
-    border: '1px solid #E2E8F0',
-    borderRadius: 50,
+    border: '1px solid #0F1C2E',
+    borderRadius: 10,
     fontSize: 13.5,
     fontFamily: 'inherit',
     outline: 'none',
@@ -97,14 +89,15 @@ const styles = {
   },
   fieldGroup: {
     marginBottom: 14,
+    
   },
   btn: {
     width: '100%',
-    padding: '11px',
+    padding: '14px',
     marginTop: 6,
     border: 'none',
-    borderRadius: 50,
-    background: '#3182ce',
+    borderRadius: 10,
+    background: '#0F1C2E',
     color: 'white',
     fontWeight: 700,
     fontSize: 14,
@@ -113,7 +106,7 @@ const styles = {
     transition: 'opacity 0.2s, transform 0.1s',
   },
   link: {
-    color: '#3182ce',
+    color: '#0F1C2E',
     cursor: 'pointer',
     fontWeight: 600,
     textDecoration: 'none',
@@ -216,26 +209,34 @@ const handleLogin = async () => {
 }
 
   return (
-    <AuthCard title="Sign In" subtitle="Sign in to your account">
+    <AuthCard title="Welcome!" subtitle="Sign in to your CPMC account">
       {error && <Alert type="error">{error}</Alert>}
       <div style={styles.fieldGroup}>
         <label style={styles.label}>CPMC ID NUMBER</label>
         <input
           value={cpmcId}
           onChange={(e) => setCpmcId(e.target.value.replace(/\D/g, ''))}
-          placeholder="ex: 597, 2122"
+          placeholder="Ex: 597, 2122"
           style={styles.input}
           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
         />
       </div>
       <PinInput label="4-Digit PIN" value={pin} onChange={setPin} id="login-pin" />
-      <button
-        onClick={handleLogin}
-        disabled={loading}
-        style={{ ...styles.btn, opacity: loading ? 0.7 : 1 }}
-      >
-        {loading ? 'Signing in…' : 'Sign In'}
-      </button>
+<button
+  onClick={handleLogin}
+  disabled={loading}
+  style={{
+    ...styles.btn,
+    opacity: loading ? 0.8 : 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
+  }}
+>
+  {loading && <span className="spinner" />}
+  {loading ? 'Signing in...' : 'Sign In'}
+</button>
       <div style={styles.footer}>
         <span onClick={onForgot} style={styles.link}>Forgot PIN?</span>
         <br /><br />
@@ -261,7 +262,21 @@ export function RegisterPage({ onBack }) {
     if (form.pin !== form.confirm_pin)   { setError('PINs do not match.'); return }
     setLoading(true)
     try {
-      await supabase.rpc('register_user', { p_cpmc_id: form.cpmc_id, p_full_name: form.full_name, p_pin: form.pin })
+      // Check if CPMC ID is already registered
+      const { data: existing } = await supabase
+        .from('users')
+        .select('id')
+        .eq('cpmc_id', form.cpmc_id)
+        .maybeSingle()
+
+      if (existing) {
+        setError('This CPMC ID is already registered. Please sign in instead.')
+        setLoading(false)
+        return
+      }
+
+      const { error: rpcErr } = await supabase.rpc('register_user', { p_cpmc_id: form.cpmc_id, p_full_name: form.full_name, p_pin: form.pin })
+      if (rpcErr) { setError(rpcErr.message); return }
       setDone(true)
     } catch (e) {
       setError(e.message)
