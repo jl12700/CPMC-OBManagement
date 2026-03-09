@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { ToastContainer } from 'react-toastify'
 import { AuthProvider, useAuth } from './lib/AuthContext'
 import { LoginPage, RegisterPage, ForgotPinPage } from './components/auth/AuthPages'
 import Dashboard from './pages/Dashboard'
@@ -6,6 +7,7 @@ import CreateOBPage from './pages/user/CreateOBPage'
 import ManageUsersPage from './pages/admin/ManageUsersPage'
 import { useRequests } from './hooks/useRequests'
 import { useNotifications } from './hooks/useNotifications'
+import { useAdminNewRequestNotifications } from './hooks/useAdminNewRequestNotifications'
 import { useUsers } from './hooks/useUsers'
 import Topbar from './components/auth/layout/Topbar'
 import Sidebar from './components/auth/layout/Sidebar'
@@ -42,6 +44,7 @@ const DEFAULT_PAGE = {
 function AppShell() {
   const { currentUser, logout } = useAuth()
   const { requests, loading: reqLoading, approveRequest, declineRequest } = useRequests()
+  useAdminNewRequestNotifications()
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications()
   const { users } = useUsers()
 
@@ -245,6 +248,13 @@ export default function App() {
       <style>{globalStyles}</style>
       <AuthProvider>
         <AuthGate />
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+        />
       </AuthProvider>
     </>
   )

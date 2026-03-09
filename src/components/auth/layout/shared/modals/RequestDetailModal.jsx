@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Modal from './Modal'
 import Icon from './Icon'
 import StatusBadge from './StatusBadge'
-import { formatDate, formatDateTime } from '../../../../../utils/helpers'
+import { formatDate, formatDateTime, displayPickupLocation } from '../../../../../utils/helpers'
 const Row = ({ label, children }) => (
   <div style={{ display: 'flex', padding: '10px 0', borderBottom: '1px solid #E2E8F0' }}>
     <div style={{ width: 140, fontSize: 12, fontWeight: 600, color: '#718096', textTransform: 'uppercase', letterSpacing: '0.05em', flexShrink: 0 }}>{label}</div>
@@ -67,6 +67,7 @@ export default function RequestDetailModal({ request, currentUser, onClose, onAp
     <Modal title="OB Request Details" onClose={onClose} maxWidth={520} footer={footer}>
       <Row label="Employee">{request.employee_name}</Row>
       <Row label="Date">{formatDate(request.scheduled_date)}</Row>
+      <Row label="Pickup Location">{displayPickupLocation(request)}</Row>
       <Row label="Destination">{request.destination}</Row>
       <Row label="Purpose">{request.purpose}</Row>
       <Row label="Supervisor">{supervisorName}</Row>

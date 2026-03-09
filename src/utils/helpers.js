@@ -34,6 +34,10 @@ export const isValidCpmcId = (id) => /^\d+$/.test(id)
 /** Capitalize first letter */
 export const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : ''
 
+/** Display pickup location: custom text when Others, otherwise the option value */
+export const displayPickupLocation = (r) =>
+  !r?.pickup_location ? '—' : (r.pickup_location === 'Others' ? (r.pickup_location_custom ?? '—') : r.pickup_location)
+
 /** Role color map for badges */
 export const ROLE_COLORS = {
   admin:      { bg: '#EDE9FE', color: '#6D28D9' },

@@ -1,5 +1,5 @@
 import { useAuth } from '../lib/AuthContext.jsx'
-import { formatDate } from '../utils/helpers'
+import { formatDate, displayPickupLocation } from '../utils/helpers'
 import StatusBadge from '../components/auth/layout/shared/modals/StatusBadge.jsx'
 
 const ClipboardIcon = () => (
@@ -118,7 +118,7 @@ export default function Dashboard({ requests = [], allUsers = [] }) {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  {['Employee', 'Destination', 'Date', 'Shift', 'Status'].map((h) => (
+                  {['Employee', 'Pickup', 'Destination', 'Date', 'Shift', 'Status'].map((h) => (
                     <th key={h} style={{ background: '#F7FAFC', textAlign: 'left', padding: '10px 14px', fontSize: 11, fontWeight: 700, color: '#718096', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #E2E8F0' }}>{h}</th>
                   ))}
                 </tr>
@@ -127,6 +127,7 @@ export default function Dashboard({ requests = [], allUsers = [] }) {
                 {recent.map((r) => (
                   <tr key={r.id}>
                     <td style={{ padding: '11px 14px', fontSize: 13, borderBottom: '1px solid #E2E8F0', fontWeight: 600 }}>{r.employee_name}</td>
+                    <td style={{ padding: '11px 14px', fontSize: 13, borderBottom: '1px solid #E2E8F0' }}>{displayPickupLocation(r)}</td>
                     <td style={{ padding: '11px 14px', fontSize: 13, borderBottom: '1px solid #E2E8F0' }}>{r.destination}</td>
                     <td style={{ padding: '11px 14px', fontSize: 13, borderBottom: '1px solid #E2E8F0' }}>{formatDate(r.scheduled_date)}</td>
                     <td style={{ padding: '11px 14px', fontSize: 11, borderBottom: '1px solid #E2E8F0', color: '#718096' }}>{r.shift}</td>

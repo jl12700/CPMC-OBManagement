@@ -2,7 +2,7 @@ import { useState } from 'react'
 import RequestDetailModal from './RequestDetailModal'
 import StatusBadge from './StatusBadge'
 import Icon from './Icon'
-import { formatDate } from '../../../../../utils/helpers'
+import { formatDate, displayPickupLocation } from '../../../../../utils/helpers'
 import { useAuth } from '../../../../../lib/AuthContext'
 const FILTERS = ['all', 'pending', 'approved', 'declined']
 
@@ -22,12 +22,17 @@ export default function RequestsTable({
 
   const filtered = requests
     .filter((r) => filter === 'all' || r.status === filter)
-    .filter((r) =>
-      !search ||
-      r.employee_name.toLowerCase().includes(search.toLowerCase()) ||
-      r.destination.toLowerCase().includes(search.toLowerCase()) ||
-      r.purpose.toLowerCase().includes(search.toLowerCase())
-    )
+    .filter((r) => {
+      if (!search) return true
+      const s = search.toLowerCase()
+      const pickup = displayPickupLocation(r)
+      return (
+        r.employee_name?.toLowerCase().includes(s) ||
+        r.destination?.toLowerCase().includes(s) ||
+        r.purpose?.toLowerCase().includes(s) ||
+        pickup?.toLowerCase().includes(s)
+      )
+    })
 
   const Btn = ({ label, active, onClick }) => (
     <button
@@ -94,6 +99,7 @@ const formatTime = (t) => {
                   {showEmployee && <th style={thStyle}>Employee</th>}
                   <th style={thStyle}>Date</th>
                   <th style={thStyle}>Time</th>
+                  <th style={thStyle}>Pickup</th>
                   <th style={thStyle}>Destination</th>
                   <th style={thStyle}>Purpose</th>
                   <th style={thStyle}>Shift</th>
@@ -110,6 +116,7 @@ const formatTime = (t) => {
                     {showEmployee && <td style={tdStyle}><strong style={{ fontSize: 13 }}>{r.employee_name}</strong></td>}
                     <td style={tdStyle}>{formatDate(r.scheduled_date)}</td>
                     <td style={tdStyle}>{formatTime(r.departure_time)}</td>
+                    <td style={tdStyle}>{displayPickupLocation(r)}</td>
                     <td style={tdStyle}>{r.destination}</td>
                     <td style={{ ...tdStyle, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.purpose}</td>
                     <td style={tdStyle}><span style={{ fontSize: 11, color: '#718096' }}>{r.shift}</span></td>

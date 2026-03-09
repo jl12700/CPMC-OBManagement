@@ -5,6 +5,7 @@ import { useUsers } from '../../hooks/useUsers'
 import { todayISO, formatDate } from '../../utils/helpers'
 import { SHIFTS } from '../../types'
 
+const PICKUP_LOCATIONS = ['F1', 'F2', 'F3', 'Others']
 const DESTINATIONS = ['F1', 'F2', 'F3', 'Others']
 
 // ── Inline icons ──────────────────────────────────────────────
@@ -170,13 +171,15 @@ export default function CreateOBPage() {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
 
   const [form, setForm] = useState({
-    scheduled_date:     '',
-    departure_time:     '',
-    destination:        'F1',
-    destination_custom: '',
-    purpose:            '',
-    supervisor_id:      '',
-    shift:              'Day Shift',
+    scheduled_date:       '',
+    departure_time:       '',
+    pickup_location:      '',
+    pickup_location_custom: '',
+    destination:          'F1',
+    destination_custom:   '',
+    purpose:              '',
+    supervisor_id:        '',
+    shift:                'Day Shift',
   })
   const [errors,      setErrors]      = useState({})
   const [showConfirm, setShowConfirm] = useState(false)
@@ -191,6 +194,9 @@ export default function CreateOBPage() {
     if (!form.scheduled_date)                 e.scheduled_date = 'Date is required.'
     else if (form.scheduled_date < today)     e.scheduled_date = 'Date cannot be in the past.'
     if (!form.departure_time)                 e.departure_time = 'Departure time is required.'
+    if (!form.pickup_location)                e.pickup_location = 'Pickup location is required.'
+    if (form.pickup_location === 'Others' && !form.pickup_location_custom.trim())
+                                              e.pickup_location_custom = 'Please specify the pickup location.'
     if (!form.purpose.trim())                 e.purpose = 'Purpose is required.'
     if (!form.supervisor_id)                  e.supervisor_id = 'Select a supervisor.'
     if (form.destination === 'Others' && !form.destination_custom.trim())
@@ -205,21 +211,23 @@ export default function CreateOBPage() {
     setSubmitting(true); setSubmitError('')
     try {
       await createRequest({
-        employee_id:        currentUser.id,
-        employee_name:      currentUser.full_name,
-        scheduled_date:     form.scheduled_date,
-        departure_time:     form.departure_time || null,
-        destination:        form.destination === 'Others'
-                              ? `Others - ${form.destination_custom}`
-                              : form.destination,
-        destination_custom: form.destination === 'Others' ? form.destination_custom : null,
-        purpose:            form.purpose,
-        supervisor_id:      form.supervisor_id,
-        shift:              form.shift,
+        employee_id:          currentUser.id,
+        employee_name:        currentUser.full_name,
+        scheduled_date:       form.scheduled_date,
+        departure_time:       form.departure_time || null,
+        pickup_location:      form.pickup_location,
+        pickup_location_custom: form.pickup_location === 'Others' ? form.pickup_location_custom : null,
+        destination:          form.destination === 'Others'
+                                ? `Others - ${form.destination_custom}`
+                                : form.destination,
+        destination_custom:   form.destination === 'Others' ? form.destination_custom : null,
+        purpose:              form.purpose,
+        supervisor_id:        form.supervisor_id,
+        shift:                form.shift,
       })
       setSubmitted(true)
       setShowConfirm(false)
-      setForm({ scheduled_date: '', departure_time: '', destination: 'F1', destination_custom: '', purpose: '', supervisor_id: '', shift: 'Day Shift' })
+      setForm({ scheduled_date: '', departure_time: '', pickup_location: '', pickup_location_custom: '', destination: 'F1', destination_custom: '', purpose: '', supervisor_id: '', shift: 'Day Shift' })
     } catch (e) {
       setSubmitError(e.message)
     } finally {
@@ -228,6 +236,9 @@ export default function CreateOBPage() {
   }
 
   const supervisor       = supervisors.find(s => s.id === form.supervisor_id)
+  const pickupLabel      = form.pickup_location === 'Others'
+    ? (form.pickup_location_custom?.trim() || '(not specified)')
+    : form.pickup_location
   const destinationLabel = form.destination === 'Others'
     ? `Others - ${form.destination_custom || '(not specified)'}`
     : form.destination
@@ -241,23 +252,25 @@ export default function CreateOBPage() {
   }
 
   const confirmData = [
-    ['Employee',    currentUser?.full_name],
-    ['Date',        formatDate(form.scheduled_date)],
-    ['Departure',   formatTime(form.departure_time)],
-    ['Destination', destinationLabel],
-    ['Purpose',     form.purpose],
-    ['Supervisor',  supervisor?.full_name],
-    ['Shift',       form.shift],
+    ['Employee',        currentUser?.full_name],
+    ['Date',            formatDate(form.scheduled_date)],
+    ['Departure',       formatTime(form.departure_time)],
+    ['Pickup Location', pickupLabel],
+    ['Destination',     destinationLabel],
+    ['Purpose',         form.purpose],
+    ['Supervisor',      supervisor?.full_name],
+    ['Shift',           form.shift],
   ]
 
   const previewRows = [
-    { label: 'Employee',    value: currentUser?.full_name },
-    { label: 'Date',        value: form.scheduled_date ? formatDate(form.scheduled_date) : null },
-    { label: 'Departure',   value: form.departure_time  ? formatTime(form.departure_time) : null },
-    { label: 'Shift',       value: form.shift },
-    { label: 'Destination', value: destinationLabel !== 'Others - (not specified)' ? destinationLabel : null },
-    { label: 'Purpose',     value: form.purpose.trim() || null },
-    { label: 'Supervisor',  value: supervisor?.full_name || null },
+    { label: 'Employee',        value: currentUser?.full_name },
+    { label: 'Date',            value: form.scheduled_date ? formatDate(form.scheduled_date) : null },
+    { label: 'Departure',       value: form.departure_time  ? formatTime(form.departure_time) : null },
+    { label: 'Shift',           value: form.shift },
+    { label: 'Pickup Location', value: pickupLabel && pickupLabel !== '(not specified)' ? pickupLabel : null },
+    { label: 'Destination',     value: destinationLabel !== 'Others - (not specified)' ? destinationLabel : null },
+    { label: 'Purpose',         value: form.purpose.trim() || null },
+    { label: 'Supervisor',      value: supervisor?.full_name || null },
   ]
 
   const filledCount = previewRows.filter(r => r.value).length
@@ -306,6 +319,36 @@ export default function CreateOBPage() {
             </div>
           </div>
         </div>
+
+        {/* Pickup Location */}
+        <div style={{ marginBottom: 16 }}>
+          <Label required>Pickup Location</Label>
+          <div style={{ position: 'relative' }}>
+            <select value={form.pickup_location} onChange={e => field('pickup_location', e.target.value)} style={{ ...inputStyle(false), paddingRight: 32 }}>
+              <option value="">Select Pickup Location</option>
+              {PICKUP_LOCATIONS.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#718096' }}>
+              <ChevronDown />
+            </div>
+          </div>
+          <FieldError msg={errors.pickup_location} />
+        </div>
+
+        {/* Custom pickup location */}
+        {form.pickup_location === 'Others' && (
+          <div style={{ marginBottom: 16 }}>
+            <Label required>Specify Pickup Location</Label>
+            <input
+              value={form.pickup_location_custom}
+              onChange={e => field('pickup_location_custom', e.target.value)}
+              placeholder="Enter pickup location"
+              style={inputStyle(false)}
+              autoFocus
+            />
+            <FieldError msg={errors.pickup_location_custom} />
+          </div>
+        )}
 
         {/* Destination */}
         <div style={{ marginBottom: 16 }}>
