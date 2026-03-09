@@ -42,18 +42,31 @@ export default function PinInput({ value = '', onChange, label, id = 'pin' }) {
             onChange={(e) => handleChange(i, e)}
             onKeyDown={(e) => handleKeyDown(i, e)}
             style={{
-              width: 52, height: 56,
+              width: 52,
+              height: 56,
               border: '1.5px solid #E2E8F0',
               borderRadius: 6,
-              fontSize: 22, fontWeight: 700,
+              fontSize: 22,
+              fontWeight: 700,
               fontFamily: 'DM Mono, monospace',
               textAlign: 'center',
               outline: 'none',
               transition: 'all 0.15s',
               WebkitTextSecurity: 'disc',
+              /* ── dark mode fix ── */
+              background: '#F9FAFB',
+              color: '#1A202C',
+              colorScheme: 'light',
+              WebkitTextFillColor: '#1A202C',
             }}
-            onFocus={(e) => { e.target.style.borderColor = '#1E56A0'; e.target.style.boxShadow = '0 0 0 3px #EBF4FF' }}
-            onBlur={(e)  => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none' }}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#1E56A0'
+              e.target.style.boxShadow   = '0 0 0 3px #EBF4FF'
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#E2E8F0'
+              e.target.style.boxShadow   = 'none'
+            }}
           />
         ))}
       </div>

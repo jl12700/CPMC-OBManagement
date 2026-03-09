@@ -8,7 +8,6 @@ import { SHIFTS } from '../../types'
 const PICKUP_LOCATIONS = ['F1', 'F2', 'F3', 'Others']
 const DESTINATIONS = ['F1', 'F2', 'F3', 'Others']
 
-// ── Inline icons ──────────────────────────────────────────────
 const CheckIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20,6 9,17 4,12"/>
@@ -30,7 +29,6 @@ const ChevronDown = () => (
   </svg>
 )
 
-// ── Reusable field components ─────────────────────────────────
 const Label = ({ children, required }) => (
   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#718096', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
     {children}{required && <span style={{ color: '#E53E3E' }}> *</span>}
@@ -47,14 +45,13 @@ const inputStyle = (disabled) => ({
   WebkitAppearance: 'none',
   MozAppearance: 'none',
   appearance: 'none',
-  minHeight: 42, // touch-friendly tap target
+  minHeight: 42,
 })
 
 const FieldError = ({ msg }) => msg
   ? <div style={{ color: '#E53E3E', fontSize: 12, marginTop: 4 }}>{msg}</div>
   : null
 
-// ── Confirmation Modal ────────────────────────────────────────
 const ConfirmModal = ({ data, onClose, onConfirm, submitting, submitError }) => (
   <div
     onClick={onClose}
@@ -79,7 +76,6 @@ const ConfirmModal = ({ data, onClose, onConfirm, submitting, submitError }) => 
         flexDirection: 'column',
       }}
     >
-      {/* Header */}
       <div style={{ padding: '18px 24px 14px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <span style={{ fontSize: 15, fontWeight: 700 }}>Confirm Submission</span>
         <button onClick={onClose} style={{ background: 'none', border: '1px solid #E2E8F0', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', color: '#718096', display: 'flex', alignItems: 'center' }}>
@@ -87,7 +83,6 @@ const ConfirmModal = ({ data, onClose, onConfirm, submitting, submitError }) => 
         </button>
       </div>
 
-      {/* Scrollable content */}
       <div style={{ padding: '20px 24px', overflowY: 'auto', flex: 1 }}>
         {submitError && (
           <div style={{ color: '#E53E3E', fontSize: 13, marginBottom: 12, padding: '8px 12px', background: '#FFF5F5', borderRadius: 6 }}>{submitError}</div>
@@ -103,7 +98,6 @@ const ConfirmModal = ({ data, onClose, onConfirm, submitting, submitError }) => 
         ))}
       </div>
 
-      {/* Footer */}
       <div style={{ padding: '14px 24px', borderTop: '1px solid #E2E8F0', display: 'flex', gap: 10, justifyContent: 'flex-end', flexShrink: 0 }}>
         <button onClick={onClose} style={{ padding: '8px 16px', border: '1px solid #E2E8F0', borderRadius: 6, background: 'white', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
           Edit
@@ -118,7 +112,6 @@ const ConfirmModal = ({ data, onClose, onConfirm, submitting, submitError }) => 
   </div>
 )
 
-// ── Collapsible Preview Panel (mobile) ───────────────────────
 const MobilePreview = ({ previewRows, filledCount, totalCount, pct }) => {
   const [open, setOpen] = useState(false)
   return (
@@ -133,7 +126,6 @@ const MobilePreview = ({ previewRows, filledCount, totalCount, pct }) => {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
           <span style={{ fontSize: 14, fontWeight: 700, color: '#1A202C' }}>Form Preview</span>
-          {/* Inline progress bar */}
           <div style={{ flex: 1, height: 5, background: '#EDF2F7', borderRadius: 99, overflow: 'hidden', maxWidth: 120 }}>
             <div style={{ height: '100%', width: `${pct}%`, background: pct === 100 ? '#38A169' : '#1E56A0', borderRadius: 99, transition: 'width 0.3s ease' }} />
           </div>
@@ -160,26 +152,22 @@ const MobilePreview = ({ previewRows, filledCount, totalCount, pct }) => {
   )
 }
 
-// ── Main Page ─────────────────────────────────────────────────
 export default function CreateOBPage() {
   const { currentUser }   = useAuth()
   const { createRequest } = useRequests()
   const { supervisors }   = useUsers()
   const today             = todayISO()
 
-  // Detect mobile via window width (simple SSR-safe check)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-
   const [form, setForm] = useState({
-    scheduled_date:       '',
-    departure_time:       '',
-    pickup_location:      '',
+    scheduled_date:         '',
+    departure_time:         '',
+    pickup_location:        '',
     pickup_location_custom: '',
-    destination:          'F1',
-    destination_custom:   '',
-    purpose:              '',
-    supervisor_id:        '',
-    shift:                'Day Shift',
+    destination:            'F1',
+    destination_custom:     '',
+    purpose:                '',
+    supervisor_id:          '',
+    shift:                  'Day Shift',
   })
   const [errors,      setErrors]      = useState({})
   const [showConfirm, setShowConfirm] = useState(false)
@@ -191,39 +179,39 @@ export default function CreateOBPage() {
 
   const validate = () => {
     const e = {}
-    if (!form.scheduled_date)                 e.scheduled_date = 'Date is required.'
-    else if (form.scheduled_date < today)     e.scheduled_date = 'Date cannot be in the past.'
-    if (!form.departure_time)                 e.departure_time = 'Departure time is required.'
-    if (!form.pickup_location)                e.pickup_location = 'Pickup location is required.'
+    if (!form.scheduled_date)             e.scheduled_date = 'Date is required.'
+    else if (form.scheduled_date < today) e.scheduled_date = 'Date cannot be in the past.'
+    if (!form.departure_time)             e.departure_time = 'Departure time is required.'
+    if (!form.pickup_location)            e.pickup_location = 'Pickup location is required.'
     if (form.pickup_location === 'Others' && !form.pickup_location_custom.trim())
-                                              e.pickup_location_custom = 'Please specify the pickup location.'
-    if (!form.purpose.trim())                 e.purpose = 'Purpose is required.'
-    if (!form.supervisor_id)                  e.supervisor_id = 'Select a supervisor.'
+                                          e.pickup_location_custom = 'Please specify the pickup location.'
+    if (!form.purpose.trim())             e.purpose = 'Purpose is required.'
+    if (!form.supervisor_id)              e.supervisor_id = 'Select a supervisor.'
     if (form.destination === 'Others' && !form.destination_custom.trim())
-                                              e.destination_custom = 'Please specify the destination.'
+                                          e.destination_custom = 'Please specify the destination.'
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
-  const handleReview = () => { if (validate()) setShowConfirm(true) }
+  const handleReview  = () => { if (validate()) setShowConfirm(true) }
 
   const handleConfirm = async () => {
     setSubmitting(true); setSubmitError('')
     try {
       await createRequest({
-        employee_id:          currentUser.id,
-        employee_name:        currentUser.full_name,
-        scheduled_date:       form.scheduled_date,
-        departure_time:       form.departure_time || null,
-        pickup_location:      form.pickup_location,
+        employee_id:            currentUser.id,
+        employee_name:          currentUser.full_name,
+        scheduled_date:         form.scheduled_date,
+        departure_time:         form.departure_time || null,
+        pickup_location:        form.pickup_location,
         pickup_location_custom: form.pickup_location === 'Others' ? form.pickup_location_custom : null,
-        destination:          form.destination === 'Others'
-                                ? `Others - ${form.destination_custom}`
-                                : form.destination,
-        destination_custom:   form.destination === 'Others' ? form.destination_custom : null,
-        purpose:              form.purpose,
-        supervisor_id:        form.supervisor_id,
-        shift:                form.shift,
+        destination:            form.destination === 'Others'
+                                  ? `Others - ${form.destination_custom}`
+                                  : form.destination,
+        destination_custom:     form.destination === 'Others' ? form.destination_custom : null,
+        purpose:                form.purpose,
+        supervisor_id:          form.supervisor_id,
+        shift:                  form.shift,
       })
       setSubmitted(true)
       setShowConfirm(false)
@@ -247,7 +235,7 @@ export default function CreateOBPage() {
     if (!t) return '—'
     const [h, m] = t.split(':').map(Number)
     const ampm = h >= 12 ? 'PM' : 'AM'
-    const hour = h % 12 || 12
+    const hour  = h % 12 || 12
     return `${hour}:${String(m).padStart(2, '0')} ${ampm}`
   }
 
@@ -277,7 +265,6 @@ export default function CreateOBPage() {
   const totalCount  = previewRows.length
   const pct         = Math.round((filledCount / totalCount) * 100)
 
-  // ── Form card (shared between layouts) ───────────────────────
   const FormCard = (
     <div style={{ background: 'white', borderRadius: 10, border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
       <div style={{ padding: '14px 20px', borderBottom: '1px solid #E2E8F0' }}>
@@ -291,7 +278,7 @@ export default function CreateOBPage() {
           <input value={currentUser?.full_name || ''} disabled style={inputStyle(true)} />
         </div>
 
-        {/* Date + Time (stacked on mobile, side-by-side on larger) */}
+        {/* Date + Time + Shift */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>
           <div>
             <Label required>Scheduled Date</Label>
@@ -335,7 +322,7 @@ export default function CreateOBPage() {
           <FieldError msg={errors.pickup_location} />
         </div>
 
-        {/* Custom pickup location */}
+        {/* Custom pickup */}
         {form.pickup_location === 'Others' && (
           <div style={{ marginBottom: 16 }}>
             <Label required>Specify Pickup Location</Label>
@@ -405,13 +392,15 @@ export default function CreateOBPage() {
           )}
         </div>
 
-        {/* Submit button — full width on mobile */}
+        {/* Submit button */}
         <button onClick={handleReview}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             width: '100%', padding: '12px 22px',
             border: 'none', borderRadius: 6, background: '#1E56A0', color: 'white',
             fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
+            // ── FIX: ensure button is never hidden behind browser chrome on mobile ──
+            marginBottom: 'env(safe-area-inset-bottom, 0px)',
           }}>
           <EyeIcon /> Review & Submit
         </button>
@@ -420,10 +409,8 @@ export default function CreateOBPage() {
     </div>
   )
 
-  // ── Desktop sidebar panels ─────────────────────────────────
   const DesktopSidebar = (
     <div style={{ flex: '0 0 calc(40% - 20px)', minWidth: 0, position: 'sticky', top: 0 }}>
-      {/* Progress card */}
       <div style={{ background: 'white', borderRadius: 10, border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', marginBottom: 14 }}>
         <div style={{ padding: '14px 20px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 14, fontWeight: 700 }}>Completion</span>
@@ -439,7 +426,6 @@ export default function CreateOBPage() {
         </div>
       </div>
 
-      {/* Preview card */}
       <div style={{ background: 'white', borderRadius: 10, border: '1px solid #E2E8F0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
         <div style={{ padding: '14px 20px', borderBottom: '1px solid #E2E8F0' }}>
           <span style={{ fontSize: 14, fontWeight: 700 }}>Preview</span>
@@ -460,7 +446,6 @@ export default function CreateOBPage() {
 
   return (
     <>
-      {/* Responsive styles injected via <style> */}
       <style>{`
         .ob-layout {
           display: flex;
@@ -496,22 +481,25 @@ export default function CreateOBPage() {
         }
       `}</style>
 
-      <div style={{ padding: '0 4px' }}>
+      {/* ── FIX: added paddingBottom with safe-area fallback so button clears browser chrome ── */}
+      <div style={{
+        padding: '0 4px',
+        paddingBottom: 'max(24px, env(safe-area-inset-bottom, 24px))',
+        overflowX: 'hidden',
+        boxSizing: 'border-box',
+      }}>
 
-        {/* Page header */}
         <div style={{ marginBottom: 16 }}>
           <h1 style={{ fontSize: 18, fontWeight: 800, color: '#1A202C', margin: 0 }}>Create OB Request</h1>
           <p style={{ fontSize: 13, color: '#718096', marginTop: 4, marginBottom: 0 }}>Fill out the form below to submit an official business request.</p>
         </div>
 
-        {/* Success banner */}
         {submitted && (
           <div style={{ padding: '12px 16px', borderRadius: 6, background: '#F0FFF4', color: '#38A169', border: '1px solid #9AE6B4', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, fontSize: 14 }}>
             <CheckIcon /> Request submitted! Your supervisor has been notified.
           </div>
         )}
 
-        {/* Mobile collapsible preview — shown above form on small screens */}
         <div className="ob-mobile-preview">
           <MobilePreview
             previewRows={previewRows}
@@ -521,7 +509,6 @@ export default function CreateOBPage() {
           />
         </div>
 
-        {/* Layout */}
         <div className="ob-layout">
           <div className="ob-form-col">
             {FormCard}
@@ -533,7 +520,6 @@ export default function CreateOBPage() {
 
       </div>
 
-      {/* Confirmation modal */}
       {showConfirm && (
         <ConfirmModal
           data={confirmData}

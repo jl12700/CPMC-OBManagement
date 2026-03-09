@@ -84,6 +84,8 @@ card: {
     fontFamily: 'inherit',
     outline: 'none',
     background: '#F9FAFB',
+    color: '#1A202C',
+    colorScheme: 'light',
     transition: 'border-color 0.2s',
     boxSizing: 'border-box',
   },
@@ -167,6 +169,24 @@ function AuthCard({ children, title, subtitle }) {
         .auth-right-pane { scrollbar-width: none; -ms-overflow-style: none; }
         @media (max-width: 700px) {
           .auth-left-pane { display: none !important; }
+        }
+        .auth-right-pane input {
+          color: #1A202C !important;
+          background: #F9FAFB !important;
+          color-scheme: light !important;
+          -webkit-text-fill-color: #1A202C !important;
+        }
+        .auth-right-pane input::placeholder {
+          color: #A0AEC0 !important;
+          -webkit-text-fill-color: #A0AEC0 !important;
+          opacity: 1 !important;
+        }
+        .auth-right-pane input:-webkit-autofill,
+        .auth-right-pane input:-webkit-autofill:hover,
+        .auth-right-pane input:-webkit-autofill:focus {
+          -webkit-text-fill-color: #1A202C !important;
+          -webkit-box-shadow: 0 0 0px 1000px #F9FAFB inset !important;
+          box-shadow: 0 0 0px 1000px #F9FAFB inset !important;
         }
       `}</style>
     </div>
