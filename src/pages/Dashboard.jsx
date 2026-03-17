@@ -118,7 +118,7 @@ export default function Dashboard({ requests = [], allUsers = [] }) {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  {['Employee', 'Pickup', 'Destination', 'Date', 'Shift', 'Status'].map((h) => (
+                  {['Employee', 'Pickup', 'Destination', 'Date', 'Shift', 'Status', 'Notes'].map((h) => (
                     <th key={h} style={{ background: '#F7FAFC', textAlign: 'left', padding: '10px 14px', fontSize: 11, fontWeight: 700, color: '#718096', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #E2E8F0' }}>{h}</th>
                   ))}
                 </tr>
@@ -132,6 +132,9 @@ export default function Dashboard({ requests = [], allUsers = [] }) {
                     <td style={{ padding: '11px 14px', fontSize: 13, borderBottom: '1px solid #E2E8F0' }}>{formatDate(r.scheduled_date)}</td>
                     <td style={{ padding: '11px 14px', fontSize: 11, borderBottom: '1px solid #E2E8F0', color: '#718096' }}>{r.shift}</td>
                     <td style={{ padding: '11px 14px', borderBottom: '1px solid #E2E8F0' }}><StatusBadge status={r.status} /></td>
+                    <td style={{ padding: '11px 14px', fontSize: 12, borderBottom: '1px solid #E2E8F0', color: r.status === 'declined' ? '#E53E3E' : '#A0AEC0', fontStyle: r.status === 'declined' ? 'italic' : 'normal', maxWidth: 180, whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                      {r.status === 'declined' && r.declined_reason ? r.declined_reason : '—'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

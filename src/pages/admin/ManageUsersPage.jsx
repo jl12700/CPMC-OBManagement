@@ -5,10 +5,27 @@ import { getInitials, formatDate } from '../../utils/helpers'
 import { ROLES } from '../../types/index'
 import RoleBadge from '../../components/auth/layout/shared/modals/RoleBadge'
 
+// Map between DB enum values and display labels
+const ROLE_DISPLAY = {
+  user:       'User',
+  supervisor: 'Approver',
+  admin:      'Admin',
+  guard:      'Guard',
+}
+
+// Map display label back to DB enum value
+const DISPLAY_TO_ROLE = Object.fromEntries(
+  Object.entries(ROLE_DISPLAY).map(([k, v]) => [v, k])
+)
+
+// ROLES from types is ['user', 'Approver', 'admin', 'guard']
+// We need the DB-safe values for saving, so derive them via DISPLAY_TO_ROLE
+const DB_ROLES = ROLES.map((r) => DISPLAY_TO_ROLE[r] ?? r)
+
 export default function ManageUsersPage() {
   const { users, loading, updateRole } = useUsers()
   const [editUser, setEditUser] = useState(null)
-  const [newRole,  setNewRole]  = useState('')
+  const [newRole,  setNewRole]  = useState('')   // always stores DB enum value
   const [search,   setSearch]   = useState('')
   const [saving,   setSaving]   = useState(false)
   const [error,    setError]    = useState('')
@@ -21,7 +38,7 @@ export default function ManageUsersPage() {
   const handleSave = async () => {
     setSaving(true); setError('')
     try {
-      await updateRole(editUser.id, newRole)
+      await updateRole(editUser.id, newRole) // newRole is always a valid DB enum value
       setEditUser(null)
     } catch (e) {
       setError(e.message)
@@ -78,6 +95,7 @@ export default function ManageUsersPage() {
                       <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 13 }}>{u.cpmc_id}</span>
                     </td>
                     <td style={{ padding: '12px 14px', borderBottom: '1px solid #E2E8F0' }}>
+                      {/* RoleBadge receives the DB value; update RoleBadge internally to show "Approver" for "supervisor" */}
                       <RoleBadge role={u.role} />
                     </td>
                     <td style={{ padding: '12px 14px', borderBottom: '1px solid #E2E8F0', fontSize: 12, color: '#718096' }}>
@@ -133,18 +151,20 @@ export default function ManageUsersPage() {
                 Assign Role
               </label>
               <select
-                value={newRole}
-                onChange={(e) => setNewRole(e.target.value)}
+                value={newRole}                              // DB enum value
+                onChange={(e) => setNewRole(e.target.value)} // still a DB enum value
                 style={{ width: '100%', padding: '9px 12px', border: '1px solid #E2E8F0', borderRadius: 6, fontSize: 13.5, fontFamily: 'inherit', outline: 'none', marginBottom: 12 }}
               >
-                {ROLES.map((r) => (
-                  <option key={r} value={r} style={{ textTransform: 'capitalize' }}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+                {DB_ROLES.map((dbRole) => (
+                  <option key={dbRole} value={dbRole}>
+                    {ROLE_DISPLAY[dbRole] ?? dbRole.charAt(0).toUpperCase() + dbRole.slice(1)}
+                  </option>
                 ))}
               </select>
 
               {newRole === 'supervisor' && (
                 <div style={{ padding: '10px 12px', background: '#EBF4FF', borderRadius: 6, fontSize: 12, color: '#1E56A0' }}>
-                  ℹ️ This user will appear in the supervisor dropdown for new OB requests.
+                  ℹ️ This user will appear in the approver dropdown for new OB requests.
                 </div>
               )}
               {newRole === 'admin' && (

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import { useAuth } from '../../../lib/AuthContext'
 import { supabase } from '../../../lib/supabase'
-import { getInitials, timeAgo } from '../../../utils/helpers'
+import { getInitials, timeAgo, ROLE_DISPLAY } from '../../../utils/helpers'
 // Inline SVG icons - no package needed
 const BellIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: 'block', visibility: 'visible', overflow: 'visible' }}>
@@ -57,9 +57,9 @@ export default function Topbar({ notifications = [], unreadCount = 0, onMarkRead
   const [saving,    setSaving]    = useState(false)
   const [saveError, setSaveError] = useState('')
 
-  const name     = currentUser?.full_name || 'User'
-  const role     = currentUser?.role      || 'user'
-  const initials = getInitials(name)
+  const name      = currentUser?.full_name || 'User'
+  const role      = currentUser?.role      || 'user'
+  const initials  = getInitials(name)
   const roleStyle = ROLE_COLORS[role] || ROLE_COLORS.user
 
   const colors = {
@@ -140,9 +140,9 @@ export default function Topbar({ notifications = [], unreadCount = 0, onMarkRead
       {/* ── Topbar ── */}
       <header style={{ background: colors.bg, borderBottom: `1px solid ${colors.border}`, height: 60, minHeight: 60, display: 'flex', alignItems: 'center', padding: '0 16px', gap: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.25)', position: 'relative', zIndex: 1000, boxSizing: 'border-box', width: '100%', maxWidth: '100vw' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-          <button 
+          <button
             onClick={() => { setShowNotifs(false); setShowProfile(false); onToggleSidebar(); }}
-            style={{ 
+            style={{
               background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.textPrimary, padding: 8, borderRadius: '50%', transition: 'background 0.2s', marginLeft: -8
             }}
             onMouseEnter={e => e.currentTarget.style.background = colors.hover}
@@ -150,7 +150,7 @@ export default function Topbar({ notifications = [], unreadCount = 0, onMarkRead
           >
             <Menu size={24} style={{ display: 'block', visibility: 'visible' }} />
           </button>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
             <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1, color: colors.textPrimary }}>
               CHIYODA
@@ -258,8 +258,9 @@ export default function Topbar({ notifications = [], unreadCount = 0, onMarkRead
                 >
                   {name}
                 </span>
+                {/* ↓ CHANGED: use ROLE_DISPLAY to show "Approver" instead of "supervisor" */}
                 <span style={{ fontSize: 10, fontWeight: 700, color: roleStyle.color, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.2 }}>
-                  {role}
+                  {ROLE_DISPLAY[role] ?? role}
                 </span>
               </div>
 
@@ -274,7 +275,10 @@ export default function Topbar({ notifications = [], unreadCount = 0, onMarkRead
                 {/* User info header inside dropdown */}
                 <div style={{ padding: '14px 16px 12px', borderBottom: `1px solid ${colors.border}`, background: 'rgba(255,255,255,0.02)' }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, wordBreak: 'break-word', lineHeight: 1.4 }}>{name}</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: roleStyle.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 3 }}>{role}</div>
+                  {/* ↓ CHANGED: use ROLE_DISPLAY to show "Approver" instead of "supervisor" */}
+                  <div style={{ fontSize: 10, fontWeight: 700, color: roleStyle.color, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 3 }}>
+                    {ROLE_DISPLAY[role] ?? role}
+                  </div>
                 </div>
 
                 <div onClick={openEditName} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', fontSize: 13, cursor: 'pointer', color: colors.textPrimary, transition: 'background 0.2s' }}

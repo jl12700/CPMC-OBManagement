@@ -186,7 +186,7 @@ export default function CreateOBPage() {
     if (form.pickup_location === 'Others' && !form.pickup_location_custom.trim())
                                           e.pickup_location_custom = 'Please specify the pickup location.'
     if (!form.purpose.trim())             e.purpose = 'Purpose is required.'
-    if (!form.supervisor_id)              e.supervisor_id = 'Select a supervisor.'
+    if (!form.supervisor_id)              e.supervisor_id = 'Select an approver.'
     if (form.destination === 'Others' && !form.destination_custom.trim())
                                           e.destination_custom = 'Please specify the destination.'
     setErrors(e)
@@ -246,7 +246,7 @@ export default function CreateOBPage() {
     ['Pickup Location', pickupLabel],
     ['Destination',     destinationLabel],
     ['Purpose',         form.purpose],
-    ['Supervisor',      supervisor?.full_name],
+    ['Approver',      supervisor?.full_name],
     ['Shift',           form.shift],
   ]
 
@@ -376,10 +376,10 @@ export default function CreateOBPage() {
 
         {/* Supervisor */}
         <div style={{ marginBottom: 24 }}>
-          <Label required>Senior Supervisor</Label>
+          <Label required>Approver</Label>
           <div style={{ position: 'relative' }}>
             <select value={form.supervisor_id} onChange={e => field('supervisor_id', e.target.value)} style={{ ...inputStyle(false), paddingRight: 32 }}>
-              <option value="">— Select Supervisor —</option>
+              <option value="">— Select Approver —</option>
               {supervisors.map(s => <option key={s.id} value={s.id}>{s.full_name}</option>)}
             </select>
             <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#718096' }}>

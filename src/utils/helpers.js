@@ -38,7 +38,18 @@ export const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : ''
 export const displayPickupLocation = (r) =>
   !r?.pickup_location ? '—' : (r.pickup_location === 'Others' ? (r.pickup_location_custom ?? '—') : r.pickup_location)
 
-/** Role color map for badges */
+/**
+ * Maps a DB role value to its display label.
+ * 'supervisor' is stored in the DB but shown as 'Approver' everywhere in the UI.
+ */
+export const ROLE_DISPLAY = {
+  admin:      'Admin',
+  supervisor: 'Approver',
+  user:       'User',
+  guard:      'Guard',
+}
+
+/** Role color map for badges — keyed by DB enum value */
 export const ROLE_COLORS = {
   admin:      { bg: '#EDE9FE', color: '#6D28D9' },
   supervisor: { bg: '#DBEAFE', color: '#1D4ED8' },

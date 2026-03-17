@@ -47,5 +47,5 @@
 
 export const DESTINATIONS = ['F1', 'F2', 'F3', 'Others']
 export const SHIFTS        = ['Day Shift', 'Night Shift']
-export const ROLES         = ['user', 'supervisor', 'admin', 'guard']
+export const ROLES         = ['user', 'Approver', 'admin', 'guard']
 export const OB_STATUSES   = ['pending', 'approved', 'declined']

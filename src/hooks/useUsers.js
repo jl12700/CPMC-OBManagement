@@ -19,6 +19,19 @@ export function useUsers() {
 
   useEffect(() => { fetchUsers() }, [fetchUsers])
 
+  // Realtime: refetch whenever any user record changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('users_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'users' },
+        () => { fetchUsers() }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [fetchUsers])
+
   const updateRole = async (userId, newRole) => {
     const { error } = await supabase
       .from('users')

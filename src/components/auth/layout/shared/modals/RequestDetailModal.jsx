@@ -70,7 +70,7 @@ export default function RequestDetailModal({ request, currentUser, onClose, onAp
       <Row label="Pickup Location">{displayPickupLocation(request)}</Row>
       <Row label="Destination">{request.destination}</Row>
       <Row label="Purpose">{request.purpose}</Row>
-      <Row label="Supervisor">{supervisorName}</Row>
+      <Row label="Approver">{supervisorName}</Row>
       <Row label="Shift">{request.shift}</Row>
       <Row label="Status"><StatusBadge status={request.status} /></Row>
       {request.declined_reason && (
